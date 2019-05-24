@@ -1,10 +1,7 @@
-import os
 import pandas as pd
 import re
 import time
 
-
-os.chdir('/Users/Nadine/Desktop/us-baby-names')
 names_data = pd.read_csv('NationalNames.csv')
 
 #funtion to find year name is most popular
