@@ -1,0 +1,120 @@
+import os
+import pandas as pd
+import re
+import time
+
+
+os.chdir('/Users/Nadine/Desktop/us-baby-names')
+names_data = pd.read_csv('NationalNames.csv')
+
+#funtion to find year name is most popular
+def name2year(name):
+    data4name = names_data[names_data["Name"] == name] #create subset for name
+    highest_count = data4name['Count'].max() #find highest count for name
+    year = data4name.loc[data4name.Count == highest_count, 'Year'].values[0] #find year highest count occurs
+    print('The name {} was the most popular in {} ({} individuals)'.format(name,year, highest_count))
+
+#function to find which name was most popular for a given year
+def year2name(year):
+    data4year = names_data[names_data["Year"] == year] #create subset for year
+    highest_count = data4year['Count'].max() #find highest count for name
+    name = data4year.loc[data4year.Count == highest_count, 'Name'].values[0] #find year highest count occurs
+    print('In {}, the most popular name was {}'.format(year,name))
+
+#function to find which name was most popular for a given range of years
+def year2name_range(year1,year2):
+    data4year = names_data[names_data["Year"].between(year1,year2)]
+    highest_count = data4year['Count'].max() #find highest count
+    name = data4year.loc[data4year.Count == highest_count, 'Name'].values[0] #find name highest count occurs
+    print('{} was the most popular name between {} & {}'.format(name,year1,year2))
+
+#function for creating list of top 10 most popular names in given year
+def top10names(year):
+    data4year = names_data[names_data["Year"] == year] #create subset for year
+    data4year = data4year.nlargest(10,'Count') #find highest count for name
+
+    lst=[]
+    for name in data4year['Name']: #creating loop to make list of names
+        lst.append(name)
+
+    print('The top 10 most popular names in {} were:'.format(year))
+    for index, value in enumerate(lst, 1): #creating loop to make enumertaed list of names
+        print("{}. {}".format(index, value))
+
+#funtion to find year name was least popular
+def name2year_least(name):
+    data4name = names_data[names_data["Name"] == name] #create subset for name
+    lowest_count = data4name['Count'].min() #find lowest count for name
+    year = data4name.loc[data4name.Count == lowest_count, 'Year'].values[0] #find year lowest count occurs
+    print('The name {} was the least popular in {} ({} individuals)'.format(name,year, lowest_count))
+
+
+#function for finding and seperating years and enacting functions
+def years_sorter():
+    years = input('Enter year or range of years to test (any years between 1800 & 2015): ')
+    years = re.findall('\d+', years) #pickinng years from input sting
+    
+    for i in years: #checking if year is within proper limits
+        if int(i) < 1800 or int(i) >= 2015:
+            print('Year selected must be between 1800 and 2014 \n Please try again')
+            time.sleep(2)
+            years_sorter()
+        if len(years) == 1: #if one item in list
+            year = int(years[0])
+            if int(choice_num) == 2:
+                top10names(year)
+            elif int(choice_num) == 3:
+                year2name(year)
+                    
+        elif len(years) == 2: #if two item in list
+            if int(choice_num) == 3:
+                year1 = int(years[0])
+                year2 = int(years[1])
+                year2name_range(year1,year2)
+            else:
+                print('Sorry, you wanted to find the top 10 names in one year only. Did you maybe want another option?')
+                time.sleep(2)
+                run()
+        else: #error message
+            print('1 or 2 years must be entered \n Please try again')
+            time.sleep(2)
+            years_sorter()
+
+#main function for running program
+def run():
+    try:
+        print('Here are your options... \n 1. Find what year a name was most or least popular \n 2. Find top ten most common names for a given year \n 3. Find what name was most common in a given year or range of years')
+        global choice_num #creating global variable for use thoughout code
+        choice_num = input('Choose an option: ')
+
+        if int(choice_num) == 1: #if choose option one
+            print('\n 1. Most common \n 2. Least common')
+            ml_num = input('Most or least common?')
+
+            name = input("What name would you like to test? ")
+            name = name.capitalize() #capitalize name
+            if int(ml_num) == 1:
+                name2year(name)
+            elif int(ml_num) == 2:
+                name2year_least(name)
+            else:
+                print('Invalid choice for most or least \n Please try again')
+                time.sleep(2)
+                run()
+        elif int(choice_num) == 2 or int(choice_num) == 3:
+            years_sorter()
+        else:
+            print('It appears you did not choose a valid option :( \n Please try again')
+            time.sleep(2)
+            run()
+
+    except TypeError:#return if name not in database
+        print('Oops! It appears this name does not exist in the database :( \n Please try again')
+        time.sleep(2)
+        run()
+    except ValueError:#return if name not in database
+        print('Oops! It appears you did not enter a valid option :( \n Please try again')
+        time.sleep(2)
+        run()
+
+run()
